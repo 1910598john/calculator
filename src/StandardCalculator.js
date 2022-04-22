@@ -6,12 +6,18 @@ function StandardCalculator(){
     const [num2, setNum2] = useState();
     const [beenErased, setBeenErased] = useState(false);
     const [beenCalculated, setBeenCalculated] = useState(false);
+    const [undefinedResult, setUndefindResult] = useState(false);
 
     //
-    const handleSetNum = (n) => {
-      let elem = document.getElementById("num");
+    const handleSetNum = (n, event) => {
 
+      if (undefinedResult === true) {
+        event.preventDefault();
+      }
+
+      let elem = document.getElementById("num");
       if (operator != null) {
+
         setNum2((r) =>  {
           var res;
 
@@ -21,7 +27,6 @@ function StandardCalculator(){
               setBeenErased(true);
             }
           }
-
 
           else if (((r === num) && (n === ".")) && (beenErased !== true)) {
             res = "0" + n;
@@ -34,6 +39,7 @@ function StandardCalculator(){
           else if (r === 0 && n === 0) {
             res = n;
           }
+
 
           else {
             res = r.toString() + n;
@@ -48,16 +54,25 @@ function StandardCalculator(){
       }
 
       else {
+
         if (elem.style.fontSize === "15px") {
           elem.style.fontSize = "30px";
         }
+
+        
+
         setNum((r) =>  {
           var res;
+
+          if (undefinedResult === true) {
+            setUndefindResult(false);
+            return n;
+          }
+
           if (beenCalculated !== false && n !== ".") {
             setBeenCalculated(false);
             return n;
           }
-
           
           else if (beenCalculated !== false && n === ".") {
             setBeenCalculated(false);
@@ -65,7 +80,6 @@ function StandardCalculator(){
           }
           
           
-
           else {
             
 
@@ -88,77 +102,113 @@ function StandardCalculator(){
     }
   
     //
-    const handleSetOperator = (op) => {
+    const handleSetOperator = (op, event) => {
+      let str = num.toString();
+      if (str.charAt(str.length - 1) === ".") {
+        str = str.slice(0, -1);
+        setNum(str);
+        setNum2(str);
+      }
+      else {
+        setNum2(num);
+      }
+
       if (beenCalculated !== false) {
         setBeenCalculated(false);
       }
-      setNum2(num);
-      document.getElementById("num").style.fontSize = "15px";
-      setOperator((o) => {
-        let operator = o;
-        switch (op) {
-          case "add":
-            operator = "+";
-            break;
-          case "subtr":
-            operator = "-";
-            break;
-          case "multi":
-            operator = "*";
-            break;
-          case "div":
-            operator = "/";
-            break;
-          case "modulo":
-            operator = "%";
-            break;
-          default:
-            operator = "";
-            break;
-        }
-        return operator;
-      })
+
+      if (undefinedResult === true) {
+        event.preventDefault();
+      }
+      else {
+        document.getElementById("num").style.fontSize = "15px";
+        setOperator((o) => {
+          let operator = o;
+          switch (op) {
+            case "add":
+              operator = "+";
+              break;
+            case "subtr":
+              operator = "-";
+              break;
+            case "multi":
+              operator = "*";
+              break;
+            case "div":
+              operator = "/";
+              break;
+            case "modulo":
+              operator = "%";
+              break;
+            default:
+              operator = "";
+              break;
+          }
+          return operator;
+        })
+      }
+      
     }
 
     //
-    const handleEraseFunction = () => {
-      if (operator != null) {
-        setNum2((r) => {
-          var str = r.toString();
-          if (str.length === 1) {
-            return 0;
-          }
-          else {
-            var erase = str.slice(0, -1);
-            return erase;
-          }
-        })
+    const handleEraseFunction = (event) => {
+      if (undefinedResult === true) {
+        event.preventDefault();
       }
+
       else {
-        setNum((r) => {
-          var str = r.toString();
-          if (str.length === 1 || beenCalculated === true) {
-            return 0;
-          }
-          else {
-            var erase = str.slice(0, -1);
-            return erase;
-          }
-        })
+        if (operator != null) {
+          setNum2((r) => {
+            var str = r.toString();
+            if (str.length === 1) {
+              return 0;
+            }
+            else {
+              var erase = str.slice(0, -1);
+              return erase;
+            }
+          })
+        }
+        else {
+          setNum((r) => {
+            var str = r.toString();
+            if (str.length === 1 || beenCalculated === true) {
+              return 0;
+            }
+            else {
+              var erase = str.slice(0, -1);
+              return erase;
+            }
+          })
+        }
       }
+      
     }
     //
     const Cfunction = () => {
-      setNum(0);
-      setNum2();
-      setOperator();
-      setBeenErased(false);
+      if (undefinedResult === true) {
+        setNum(0);
+        setUndefindResult(false);
+      } else {
+        setNum(0);
+        setNum2();
+        setOperator();
+        setBeenErased(false);
+      }
       document.getElementById("num").style.fontSize = "30px";
     }
     //
     const CEfunction = () => {
       if (num != null && operator != null) {
         setNum2(0);
+      }
+      else if (undefinedResult === true) {
+        setNum(0);
+        setUndefindResult(false);
+        let elem = document.getElementById("num");
+        if (elem.style.fontSize === "15px") {
+          elem.style.fontSize = "30px";
+        }
       }
       else {
         setNum(0);
@@ -168,83 +218,106 @@ function StandardCalculator(){
       }
     }
     //
-    const handleCalculation = () => {
-      document.getElementById("num").style.fontSize = "30px";
-      document.getElementById("result").style.cursor = "pointer";
-      setNum((r) => {
+    const handleCalculation = (event) => {
+      if (undefinedResult === true) {
+        event.preventDefault();
+      }
 
-        if (num2 != null && operator != null) {
-          var calc, n1, n2;
-        
-          n1 = r.toString();
-          n2 = num2.toString();
+      else {
+        document.getElementById("num").style.fontSize = "30px";
+        document.getElementById("result").style.cursor = "pointer";
 
-          //first numbers to be calculated
-          if (n1.includes(".")) {
-            n1 = parseFloat(r);
+        setNum((r) => {
+
+          if (num2 != null && operator != null) {
+            var calc, n1, n2;
+          
+            n1 = r.toString();
+            n2 = num2.toString();
+  
+            //first numbers to be calculated
+            if (n1.includes(".")) {
+              n1 = parseFloat(r);
+            }
+            else {
+              n1 = parseInt(r);
+            }
+            
+  
+            //second numbers to be calculated
+            if (n2.includes(".")) {
+              n2 = parseFloat(num2);
+            }
+            else {
+              n2 = parseInt(num2);
+            }
+            switch (operator) {
+              case "+":
+                calc = n1 + n2;
+                break;
+              case "-":
+                calc = n1 - n2;
+                break;
+              case "*":
+                calc = n1 * n2;
+                break;
+              case "/":
+                calc = n1 / n2;
+                break;
+              case "%":
+                calc = n1 % n2;
+                break;
+              default:
+                calc = "";
+                break;
+            }
+            if (n1 === 0 && n2 === 0) {
+              document.getElementById("num").style.fontSize = "15px";
+              setNum2();
+              setOperator();
+              setUndefindResult(true);
+              return "Result is undefined";
+            }
+            let res = calc.toString();
+            
+            if (res.length > 16) {
+              res = res.slice(0, 20);
+            }
+            setNum2();
+            setOperator();
+            setBeenCalculated(true);
+            setBeenErased(false);
+  
+            return res;
+            
           }
           else {
-            n1 = parseInt(r);
+            return r;
           }
-          
-
-          //second numbers to be calculated
-          if (n2.includes(".")) {
-            n2 = parseFloat(num2);
-          }
-          else {
-            n2 = parseInt(num2);
-          }
-          switch (operator) {
-            case "+":
-              calc = n1 + n2;
-              break;
-            case "-":
-              calc = n1 - n2;
-              break;
-            case "*":
-              calc = n1 * n2;
-              break;
-            case "/":
-              calc = n1 / n2;
-              break;
-            case "%":
-              calc = n1 % n2;
-              break;
-            default:
-              calc = "";
-              break;
-          }
-          if (n1 === 0 && n2 === 0) {
-            document.getElementById("num").style.fontSize = "15px";
-            return "Result is undefined";
-          }
-          let res = calc.toString();
-          
-          if (res.length > 16) {
-            res = res.slice(0, 20);
-          }
-          setNum2();
-          setOperator();
-          setBeenCalculated(true);
-          setBeenErased(false);
-
-          return res;
-          
-        }
-        else {
-          return r;
-        }
-
-      })
+  
+        })
+      }
       
     }
+
     //handle decimal point
-    const handleDecimalPoint = () => {
-      let str = num.toString();
-      if (!str.includes(".")) {
-        handleSetNum(".");
+    const handleDecimalPoint = (event) => {
+      if (undefinedResult === true) {
+        event.preventDefault();
       }
+      else {
+        let str = num.toString();
+        let str2;
+        if (num2 != null) {
+          str2 = num2.toString();
+        }
+
+        if ((!str.includes(".") && operator == null && num2 == null) || (!str2.includes(".") && operator != null)) {
+          handleSetNum(".");
+        }
+      }
+      
+      
     }
 
     //copy result to clipboard
@@ -261,7 +334,6 @@ function StandardCalculator(){
       
     }
      
-  
     return (
         <>
           <div className="standard-calculator standard" id="standard-calculator">
